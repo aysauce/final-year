@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Attendance System — Login</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Secure Attendance Verification</h1>
+      <p class="muted">For Nigeria tertiary institutions</p>
+      <form id="loginForm" class="card">
+        <label>Institutional Email / Matric / Staff ID
+          <input type="text" id="identifier" required placeholder="e.g., student@uni.edu.ng or STU1234" />
+        </label>
+        <label>Password
+          <div class="row" style="gap:0.5rem">
+            <input type="password" id="password" required />
+            <button type="button" id="togglePassword" class="button" style="padding:0.4rem 0.8rem">Show</button>
+          </div>
+        </label>
+        <fieldset>
+          <legend>Role</legend>
+          <label><input type="radio" name="role" value="student" checked /> Student</label>
+          <label><input type="radio" name="role" value="teacher" /> Teacher</label>
+          <label><input type="radio" name="role" value="admin" /> Admin</label>
+        </fieldset>
+        <button type="submit">Log In</button>
+        <p class="muted">New student? <a href="/signup.html">Create an account first.</a></p>
+        <p id="loginError" class="error" aria-live="polite"></p>
+      </form>
+    </main>
+    <script src="js/config.js"></script>
+    <script src="js/webauthn-helpers.js"></script>
+    <script src="js/login.js"></script>
+  </body>
+  </html>

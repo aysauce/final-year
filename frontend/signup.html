@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Student Signup</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Create Student Account</h1>
+      <p class="muted">Use your institutional email and matric number.</p>
+      <form id="signupForm" class="card">
+        <label>Email
+          <input type="email" id="email" required placeholder="student@uni.edu.ng" />
+        </label>
+        <label>Matric Number
+          <input type="text" id="matricNumber" required placeholder="STU1001" />
+        </label>
+        <label>Password
+          <input type="password" id="password" required />
+        </label>
+        <button type="submit">Sign Up & Register Device</button>
+        <p id="signupStatus" class="muted" aria-live="polite"></p>
+        <p class="muted"><a href="/">Back to login</a></p>
+      </form>
+    </main>
+    <script src="js/config.js"></script>
+    <script src="js/webauthn-helpers.js"></script>
+    <script src="js/signup.js"></script>
+  </body>
+</html>

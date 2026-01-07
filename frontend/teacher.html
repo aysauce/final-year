@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Teacher Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>Teacher Dashboard</h1>
+      <nav>
+        <button id="logoutBtn">Logout</button>
+      </nav>
+    </header>
+    <main class="container">
+      <section class="card">
+        <h2>Courses</h2>
+        <form id="courseForm" class="row" style="gap:0.5rem">
+          <input type="text" id="courseName" placeholder="Course Name" required />
+          <input type="text" id="courseCode" placeholder="Code (e.g., CSC201)" required />
+          <button type="submit">Add/Update</button>
+        </form>
+        <table class="table" id="coursesTable" aria-live="polite">
+          <thead><tr><th>Code</th><th>Name</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="actions">
+          <button id="downloadCsv">Download Session CSV</button>
+          <button id="downloadCourseCsv">Download Course Report</button>
+        </div>
+      </section>
+      <section class="card">
+        <h2>Create Attendance</h2>
+        <form id="startForm" class="row" style="gap:0.5rem; flex-wrap:wrap">
+          <label style="flex:1; min-width:220px">Course
+            <select id="courseSelect" required style="width:100%"></select>
+          </label>
+          <label style="width:160px">Duration (min)
+            <input type="number" id="duration" min="1" max="10" value="5" required />
+          </label>
+          <button type="submit">Start Attendance</button>
+        </form>
+        <small id="subnetNote" class="muted">Network is auto-detected; SSID uses course code automatically.</small>
+      </section>
+
+      <section class="card">
+        <h2>Active Session</h2>
+        <div id="sessionInfo" class="muted">No active session</div>
+        <div class="actions">
+          <button id="togglePauseBtn" disabled>Pause</button>
+          <button id="endSessionBtn" disabled>End Session</button>
+        </div>
+        <div class="muted" id="timerText"></div>
+      </section>
+
+      <section class="card">
+        <h2>Live Attendance</h2>
+        <table class="table" id="attendanceTable" aria-live="polite">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Timestamp</th>
+              <th>Email</th>
+              <th>Matric</th>
+              <th>Course</th>
+              <th>Device</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </main>
+    <script src="js/config.js"></script>
+    <script src="js/teacher.js"></script>
+  </body>
+  </html>

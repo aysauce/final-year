@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>Student Dashboard</h1>
+      <nav>
+        <button id="logoutBtn">Logout</button>
+      </nav>
+    </header>
+    <main class="container">
+      <section class="card">
+        <h2>Available Courses (on your network)</h2>
+        <div class="actions">
+          <input type="text" id="codeFilter" placeholder="Filter by code (e.g., CSC201)" />
+          <button id="refreshAvail">Refresh</button>
+        </div>
+        <table class="table" id="availTable">
+          <thead><tr><th>Course</th><th>Code</th><th>Ends</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>Request OTP</h2>
+        <form id="otpForm">
+          <input type="hidden" id="sessionId" />
+          <p class="muted">Select a course above, then request OTP.</p>
+          <button type="submit">Request OTP</button>
+          <p id="otpMsg" class="muted" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Mark Attendance</h2>
+        <form id="submitForm">
+          <input type="hidden" id="submitSessionId" />
+          <label>OTP
+            <input type="text" id="otp" required />
+          </label>
+          <button type="submit">Submit</button>
+          <p id="submitMsg" class="muted" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>History</h2>
+        <table class="table" id="historyTable">
+          <thead>
+            <tr><th>#</th><th>Time</th><th>Course</th><th>SSID</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="actions"><a id="downloadMyGrouped" href="#">Download My Course History (CSV)</a></div>
+      </section>
+    </main>
+    <script src="js/config.js"></script>
+    <script src="js/webauthn-helpers.js"></script>
+    <script src="js/student.js"></script>
+    <script src="js/student-filter.js"></script>
+  </body>
+  </html>
