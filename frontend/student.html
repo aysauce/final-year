@@ -8,20 +8,20 @@
   </head>
   <body>
     <header class="topbar">
-      <h1>Student Dashboard</h1>
+      <h1 id="studentGreeting">Hello</h1>
       <nav>
         <button id="logoutBtn">Logout</button>
       </nav>
     </header>
     <main class="container">
       <section class="card">
-        <h2>Available Courses (on your network)</h2>
+        <h2>Available Courses</h2>
         <div class="actions">
           <input type="text" id="codeFilter" placeholder="Filter by code (e.g., CSC201)" />
           <button id="refreshAvail">Refresh</button>
         </div>
         <table class="table" id="availTable">
-          <thead><tr><th>Course</th><th>Code</th><th>Ends</th><th></th></tr></thead>
+          <thead><tr><th>Course</th><th>Code</th><th>Lecturer</th><th>Ends</th><th></th></tr></thead>
           <tbody></tbody>
         </table>
       </section>
@@ -50,13 +50,41 @@
 
       <section class="card">
         <h2>History</h2>
+        <div class="history-controls">
+          <label class="field">
+            Course
+            <select id="historyCourse">
+              <option value="">All courses (last 7 only)</option>
+            </select>
+          </label>
+          <label class="field">
+            Range
+            <select id="historyRange">
+              <option value="last7" selected>Last 7 attendances</option>
+              <option value="today">Today</option>
+              <option value="yesterday">Yesterday</option>
+              <option value="week">Last Week</option>
+              <option value="month">Last Month</option>
+              <option value="custom">Custom</option>
+            </select>
+          </label>
+          <label id="historyFromWrap" class="field" style="display:none">
+            From
+            <input type="date" id="historyFrom" />
+          </label>
+          <label id="historyToWrap" class="field" style="display:none">
+            To
+            <input type="date" id="historyTo" />
+          </label>
+          <button id="historyApply" type="button">Apply</button>
+        </div>
         <table class="table" id="historyTable">
           <thead>
-            <tr><th>#</th><th>Time</th><th>Course</th><th>SSID</th></tr>
+            <tr><th>#</th><th>Date (WAT)</th><th>Time (WAT)</th><th>Course</th></tr>
           </thead>
           <tbody></tbody>
         </table>
-        <div class="actions"><a id="downloadMyGrouped" href="#">Download My Course History (CSV)</a></div>
+        <p class="muted" id="historyNote">Showing your most recent 7 attendances across all courses.</p>
       </section>
     </main>
     <script src="js/config.js"></script>

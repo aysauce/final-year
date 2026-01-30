@@ -10,6 +10,21 @@ import { verifyWindowSeconds } from '../utils/webauthn.js';
 
 const router = express.Router();
 
+// Current student profile
+router.get('/me', requireAuth(['student']), async (req, res) => {
+  try {
+    const { rows } = await query(
+      'SELECT surname, first_name, middle_name, email, matric_number FROM users WHERE id = $1',
+      [req.user.id]
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Student not found' });
+    res.json(rows[0]);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Failed to load profile' });
+  }
+});
+
 // Generate OTP (emailed) for an active session
 router.post(
   '/generate-otp',
@@ -36,17 +51,46 @@ router.post(
       );
 
       // email OTP
-      const { rows: urows } = await query('SELECT email FROM users WHERE id = $1', [req.user.id]);
+      const { rows: urows } = await query('SELECT email, surname, first_name FROM users WHERE id = $1', [req.user.id]);
       const email = urows[0]?.email;
+      const surname = urows[0]?.surname || '';
+      const firstName = urows[0]?.first_name || '';
       const domains = (process.env.INSTITUTION_EMAIL_DOMAIN || '').split(',').map(s=>s.trim()).filter(Boolean);
       if (domains.length && !domains.some(d => email.toLowerCase().endsWith(d.toLowerCase()))) {
         return res.status(400).json({ error: 'Email not within allowed institution domain' });
       }
-      await sendOtpEmail(email, plain, sessionId);
+      const { rows: crows } = await query('SELECT code FROM courses WHERE id = $1', [ses.course_id]);
+      const courseCode = crows[0]?.code || `Session ${sessionId}`;
+      const minutes = ses.duration || Math.max(1, Math.ceil(ttlSec / 60));
+      await sendOtpEmail(email, plain, { courseCode, minutes, surname, firstName });
       res.json({ ok: true });
     } catch (e) {
       console.error(e);
       res.status(500).json({ error: 'Failed to generate OTP' });
+    }
+  }
+);
+
+// Logout (student) - set device cooldown
+router.post(
+  '/logout',
+  requireAuth(['student']),
+  body('deviceId').isString().trim(),
+  async (req, res) => {
+    const errs = validationResult(req);
+    if (!errs.isEmpty()) return res.status(400).json({ errors: errs.array() });
+    try {
+      await query(
+        `INSERT INTO device_cooldowns (device_id, cooldown_until)
+         VALUES ($1, NOW() + INTERVAL '10 minutes')
+         ON CONFLICT (device_id)
+         DO UPDATE SET cooldown_until = EXCLUDED.cooldown_until`,
+        [req.body.deviceId]
+      );
+      res.json({ ok: true });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: 'Failed to log out' });
     }
   }
 );
@@ -69,6 +113,19 @@ router.post(
       const now = Date.now();
       if (new Date(ses.start_time).getTime() > now || new Date(ses.end_time).getTime() < now) {
         return res.status(400).json({ error: 'Outside session time' });
+      }
+
+      const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+      const { rows: recentRows } = await query(
+        `SELECT a.id, a.timestamp
+         FROM attendance a
+         JOIN sessions s ON a.session_id = s.id
+         WHERE a.student_id = $1 AND s.course_id = $2 AND a.timestamp >= $3
+         ORDER BY a.timestamp DESC LIMIT 1`,
+        [req.user.id, ses.course_id, twoHoursAgo]
+      );
+      if (recentRows[0]) {
+        return res.json({ ok: true, alreadyRecorded: true });
       }
 
       // IP subnet check
@@ -172,8 +229,11 @@ router.get('/available-courses', requireAuth(['student']), async (req, res) => {
   try {
     const ip = (req.headers['x-forwarded-for'] || req.ip || '').toString().split(',')[0].trim();
     const { rows } = await query(
-      `SELECT s.id as session_id, s.ssid, s.end_time, c.id as course_id, c.name, c.code, s.subnet
-       FROM sessions s JOIN courses c ON s.course_id = c.id
+      `SELECT s.id as session_id, s.ssid, s.end_time, c.id as course_id, c.name, c.code, s.subnet,
+              u.surname, u.first_name, u.middle_name, u.title
+       FROM sessions s
+       JOIN courses c ON s.course_id = c.id
+       JOIN users u ON u.id = c.teacher_id
        WHERE s.status = 'active' AND NOW() BETWEEN s.start_time AND s.end_time
        ORDER BY s.end_time ASC`
     );
@@ -182,6 +242,7 @@ router.get('/available-courses', requireAuth(['student']), async (req, res) => {
       courseId: r.course_id,
       name: r.name,
       code: r.code,
+      lecturer: [r.title, r.surname, r.first_name, r.middle_name].filter(Boolean).join(' '),
       ssid: r.ssid,
       endsAt: r.end_time,
     }));

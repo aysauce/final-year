@@ -49,11 +49,13 @@ router.get('/students', async (req, res) => {
 router.post(
   '/students',
   body('email').isEmail().normalizeEmail(),
-  body('matricNumber').isString().trim().escape(),
+  body('matricNumber').isString().trim(),
   body('password').isString().isLength({ min: 6 }),
   async (req, res) => {
     if (!handleValidation(req, res)) return;
-    const { email, matricNumber, password } = req.body;
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const matricNumber = String(req.body.matricNumber || '').trim().toUpperCase();
+    const password = req.body.password;
     try {
       const hashed = await bcrypt.hash(password, 10);
       const { rows } = await query(
@@ -74,13 +76,15 @@ router.put(
   '/students/:id',
   param('id').isInt(),
   body('email').optional().isEmail().normalizeEmail(),
-  body('matricNumber').optional().isString().trim().escape(),
+  body('matricNumber').optional().isString().trim(),
   body('password').optional().isString().isLength({ min: 6 }),
   async (req, res) => {
     if (!handleValidation(req, res)) return;
     const updates = [];
     const params = [];
-    const { email, matricNumber, password } = req.body;
+    const email = req.body.email ? String(req.body.email).trim().toLowerCase() : null;
+    const matricNumber = req.body.matricNumber ? String(req.body.matricNumber).trim().toUpperCase() : null;
+    const password = req.body.password;
     if (email) {
       params.push(email);
       updates.push(`email = $${params.length}`);
@@ -145,11 +149,13 @@ router.get('/teachers', async (req, res) => {
 router.post(
   '/teachers',
   body('email').isEmail().normalizeEmail(),
-  body('staffId').isString().trim().escape(),
+  body('staffId').isString().trim(),
   body('password').isString().isLength({ min: 6 }),
   async (req, res) => {
     if (!handleValidation(req, res)) return;
-    const { email, staffId, password } = req.body;
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const staffId = String(req.body.staffId || '').trim().toUpperCase();
+    const password = req.body.password;
     try {
       const hashed = await bcrypt.hash(password, 10);
       const { rows } = await query(
@@ -170,13 +176,15 @@ router.put(
   '/teachers/:id',
   param('id').isInt(),
   body('email').optional().isEmail().normalizeEmail(),
-  body('staffId').optional().isString().trim().escape(),
+  body('staffId').optional().isString().trim(),
   body('password').optional().isString().isLength({ min: 6 }),
   async (req, res) => {
     if (!handleValidation(req, res)) return;
     const updates = [];
     const params = [];
-    const { email, staffId, password } = req.body;
+    const email = req.body.email ? String(req.body.email).trim().toLowerCase() : null;
+    const staffId = req.body.staffId ? String(req.body.staffId).trim().toUpperCase() : null;
+    const password = req.body.password;
     if (email) {
       params.push(email);
       updates.push(`email = $${params.length}`);

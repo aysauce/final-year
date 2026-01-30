@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Teacher Registration</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Create Lecturer Account</h1>
+      <form id="teacherRegisterForm" class="card">
+        <div class="row" style="gap:0.5rem; flex-wrap:wrap">
+          <label class="field" style="min-width:180px; flex:1">
+            Surname
+            <input type="text" id="teacherSurname" required />
+          </label>
+          <label class="field" style="min-width:180px; flex:1">
+            First Name
+            <input type="text" id="teacherFirstName" required />
+          </label>
+          <label class="field" style="min-width:180px; flex:1">
+            Middle Name
+            <input type="text" id="teacherMiddleName" />
+          </label>
+        </div>
+        <div class="row" style="gap:0.5rem; flex-wrap:wrap">
+          <label class="field" style="min-width:180px; flex:1">
+            Position
+            <select id="teacherTitle" required>
+              <option value="">Select position</option>
+              <option value="mr">Mr</option>
+              <option value="mrs">Mrs</option>
+              <option value="miss">Miss</option>
+              <option value="dr">Dr</option>
+              <option value="prof">Prof</option>
+            </select>
+          </label>
+          <label class="field" style="min-width:180px; flex:1">
+            Sex
+            <select id="teacherSex" required>
+              <option value="">Select sex</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </label>
+        </div>
+        <label>Institutional Email
+          <input type="email" id="teacherEmail" required placeholder="lecturer@uni.edu.ng" />
+        </label>
+        <label>Staff ID
+          <input type="text" id="teacherStaffId" required placeholder="STAFF1001" />
+        </label>
+        <label>Password
+          <div class="row" style="gap:0.5rem">
+            <input type="password" id="teacherPassword" required />
+            <button type="button" id="toggleTeacherPassword" class="button" style="padding:0.4rem 0.8rem">Show</button>
+          </div>
+        </label>
+        <div class="actions">
+          <button type="submit">Create Teacher Account</button>
+          <p id="teacherRegisterStatus" class="muted" aria-live="polite"></p>
+        </div>
+      </form>
+    </main>
+    <script src="js/config.js"></script>
+    <script src="js/teacher-register.js"></script>
+  </body>
+</html>

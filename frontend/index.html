@@ -9,9 +9,27 @@
   <body>
     <main class="container">
       <h1>Secure Attendance Verification</h1>
-      <p class="muted">For Nigeria tertiary institutions</p>
+      <p class="muted">For Nigerian Tertiary Institutions</p>
+      <div class="pill-group" role="radiogroup" aria-label="Role">
+        <label class="pill">
+          <input type="radio" name="role" value="student" checked form="loginForm" />
+          <span>Student</span>
+        </label>
+        <label class="pill">
+          <input type="radio" name="role" value="teacher" form="loginForm" />
+          <span>Teacher</span>
+        </label>
+        <label class="pill">
+          <input type="radio" name="role" value="admin" form="loginForm" />
+          <span>Admin</span>
+        </label>
+      </div>
       <form id="loginForm" class="card">
-        <label>Institutional Email / Matric / Staff ID
+        <div id="loginLoading" class="loading-bar" role="status" aria-live="polite" aria-hidden="true">
+          <span class="sr-only">Loading...</span>
+          <div class="loading-bar__fill"></div>
+        </div>
+        <label><span id="identifierLabel">Email/Matric</span>
           <input type="text" id="identifier" required placeholder="e.g., student@uni.edu.ng or STU1234" />
         </label>
         <label>Password
@@ -20,14 +38,14 @@
             <button type="button" id="togglePassword" class="button" style="padding:0.4rem 0.8rem">Show</button>
           </div>
         </label>
-        <fieldset>
-          <legend>Role</legend>
-          <label><input type="radio" name="role" value="student" checked /> Student</label>
-          <label><input type="radio" name="role" value="teacher" /> Teacher</label>
-          <label><input type="radio" name="role" value="admin" /> Admin</label>
-        </fieldset>
         <button type="submit">Log In</button>
-        <p class="muted">New student? <a href="/signup.html">Create an account first.</a></p>
+        <div id="studentSignup" class="signup-callout" role="region" aria-label="Student registration">
+          <div>
+            <h3>New student?</h3>
+            <p class="muted">Create your account and register this device.</p>
+          </div>
+          <a class="button" href="/signup.html">Create account</a>
+        </div>
         <p id="loginError" class="error" aria-live="polite"></p>
       </form>
     </main>

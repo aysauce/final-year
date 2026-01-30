@@ -8,7 +8,7 @@
   </head>
   <body>
     <header class="topbar">
-      <h1>Teacher Dashboard</h1>
+      <h1 id="teacherGreeting">Hello</h1>
       <nav>
         <button id="logoutBtn">Logout</button>
       </nav>
@@ -16,32 +16,50 @@
     <main class="container">
       <section class="card">
         <h2>Courses</h2>
-        <form id="courseForm" class="row" style="gap:0.5rem">
-          <input type="text" id="courseName" placeholder="Course Name" required />
-          <input type="text" id="courseCode" placeholder="Code (e.g., CSC201)" required />
-          <button type="submit">Add/Update</button>
+        <form id="courseForm" class="row" style="gap:0.5rem; flex-wrap:wrap">
+          <label class="field" style="min-width:220px">
+            Select
+            <select id="manageCourseSelect">
+              <option value="">New course</option>
+            </select>
+          </label>
+          <label class="field" style="min-width:220px">
+            Course Name
+            <input type="text" id="courseName" required />
+          </label>
+          <label class="field" style="min-width:180px">
+            Course Code
+            <input type="text" id="courseCode" required />
+          </label>
+          <label class="field" style="min-width:160px">
+            Pass Mark (%)
+            <input type="number" id="coursePassMark" min="0" max="100" value="75" required />
+          </label>
+          <div class="button-group">
+            <button type="submit" id="saveCourseBtn">Add Course</button>
+            <button type="button" id="deleteCourseBtn" class="button-secondary" disabled>Drop Course</button>
+          </div>
         </form>
         <table class="table" id="coursesTable" aria-live="polite">
           <thead><tr><th>Code</th><th>Name</th></tr></thead>
           <tbody></tbody>
         </table>
         <div class="actions">
-          <button id="downloadCsv">Download Session CSV</button>
-          <button id="downloadCourseCsv">Download Course Report</button>
+          <button id="downloadCsv" disabled>Download Today's Attendance</button>
+          <button id="downloadCourseCsv">Download Course Attendance</button>
         </div>
       </section>
       <section class="card">
         <h2>Create Attendance</h2>
         <form id="startForm" class="row" style="gap:0.5rem; flex-wrap:wrap">
-          <label style="flex:1; min-width:220px">Course
-            <select id="courseSelect" required style="width:100%"></select>
+          <label class="field" style="flex:1; min-width:220px">Course
+            <select id="courseSelect" required></select>
           </label>
-          <label style="width:160px">Duration (min)
+          <label class="field" style="width:160px">Duration (min)
             <input type="number" id="duration" min="1" max="10" value="5" required />
           </label>
           <button type="submit">Start Attendance</button>
         </form>
-        <small id="subnetNote" class="muted">Network is auto-detected; SSID uses course code automatically.</small>
       </section>
 
       <section class="card">
@@ -61,10 +79,39 @@
             <tr>
               <th>#</th>
               <th>Timestamp</th>
-              <th>Email</th>
+              <th>Name</th>
               <th>Matric</th>
-              <th>Course</th>
-              <th>Device</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>Course Attendance Summary</h2>
+        <div class="actions" style="flex-wrap:wrap">
+          <label class="field" style="min-width:220px">
+            Course
+            <select id="courseReportSelect"></select>
+          </label>
+          <label class="field" style="min-width:200px">
+            Search (Name or Matric)
+            <input type="text" id="courseReportSearch" placeholder="e.g., Nzwetta or STU1001" />
+          </label>
+          <label class="field" style="min-width:140px">
+            Score Out Of
+            <input type="number" id="courseReportScale" min="1" value="10" />
+          </label>
+          <button id="courseReportRefresh" type="button">Refresh</button>
+        </div>
+        <table class="table" id="courseReportTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Matric</th>
+              <th>Attendance</th>
+              <th>Score</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody></tbody>

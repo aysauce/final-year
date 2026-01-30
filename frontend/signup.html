@@ -9,8 +9,25 @@
   <body>
     <main class="container">
       <h1>Create Student Account</h1>
-      <p class="muted">Use your institutional email and matric number.</p>
       <form id="signupForm" class="card">
+        <div id="signupLoading" class="loading-bar" role="status" aria-live="polite" aria-hidden="true">
+          <span class="sr-only">Loading...</span>
+          <div class="loading-bar__fill"></div>
+        </div>
+        <div class="row" style="gap:0.5rem; flex-wrap:wrap">
+          <label class="field" style="min-width:180px; flex:1">
+            Surname
+            <input type="text" id="surname" required />
+          </label>
+          <label class="field" style="min-width:180px; flex:1">
+            First Name
+            <input type="text" id="firstName" required />
+          </label>
+          <label class="field" style="min-width:180px; flex:1">
+            Middle Name
+            <input type="text" id="middleName" />
+          </label>
+        </div>
         <label>Email
           <input type="email" id="email" required placeholder="student@uni.edu.ng" />
         </label>
@@ -18,11 +35,16 @@
           <input type="text" id="matricNumber" required placeholder="STU1001" />
         </label>
         <label>Password
-          <input type="password" id="password" required />
+          <div class="row" style="gap:0.5rem">
+            <input type="password" id="password" required />
+            <button type="button" id="toggleSignupPassword" class="button" style="padding:0.4rem 0.8rem">Show</button>
+          </div>
         </label>
         <button type="submit">Sign Up & Register Device</button>
         <p id="signupStatus" class="muted" aria-live="polite"></p>
-        <p class="muted"><a href="/">Back to login</a></p>
+        <div class="actions">
+          <a class="button button-secondary" href="/">Back to login</a>
+        </div>
       </form>
     </main>
     <script src="js/config.js"></script>

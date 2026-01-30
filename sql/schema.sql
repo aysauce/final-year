@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS courses (
   teacher_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   code TEXT NOT NULL,
+  pass_mark INTEGER NOT NULL DEFAULT 75,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   UNIQUE (teacher_id, code)
 );
@@ -16,6 +17,12 @@ CREATE TABLE IF NOT EXISTS courses (
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   role TEXT NOT NULL CHECK (role IN ('student','teacher','admin')),
+  surname TEXT,
+  first_name TEXT,
+  middle_name TEXT,
+  middle_name TEXT,
+  title TEXT,
+  sex TEXT,
   matric_number TEXT UNIQUE,
   staff_id TEXT UNIQUE,
   email TEXT UNIQUE NOT NULL,
@@ -70,6 +77,12 @@ CREATE TABLE IF NOT EXISTS otp_requests (
   expires_at TIMESTAMP NOT NULL,
   used BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Per-device login cooldowns (device_id stored in browser localStorage)
+CREATE TABLE IF NOT EXISTS device_cooldowns (
+  device_id TEXT PRIMARY KEY,
+  cooldown_until TIMESTAMP NOT NULL
 );
 
 -- Seed demo users

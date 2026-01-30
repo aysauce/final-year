@@ -23,11 +23,14 @@ export function getTransporter() {
   return transporter;
 }
 
-export async function sendOtpEmail(to, code, sessionId) {
+export async function sendOtpEmail(to, code, { courseCode, minutes, surname, firstName }) {
   const from = process.env.EMAIL_FROM || 'no-reply@example.com';
-  const subject = `Your Attendance OTP (Session ${sessionId})`;
-  const text = `Use this OTP within the next few minutes: ${code}\nSession: ${sessionId}`;
+  const safeCourse = courseCode || 'Course';
+  const safeMinutes = Number.isFinite(minutes) && minutes > 0 ? Math.ceil(minutes) : 5;
+  const subject = `Your Attendance OTP - ${safeCourse}`;
+  const nameParts = [surname, firstName].filter(Boolean).join(' ');
+  const hello = nameParts ? `Hello, ${nameParts},` : 'Hello,';
+  const text = `${hello}\n\nThis OTP is unique to you and lasts for less than ${safeMinutes} minutes, use it now:\n${code}`;
   const tr = getTransporter();
   return tr.sendMail({ from, to, subject, text });
 }
-

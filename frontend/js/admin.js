@@ -19,7 +19,8 @@ function ensureAdmin() {
 ensureAdmin();
 
 document.getElementById('logoutBtn').addEventListener('click', () => {
-  localStorage.clear();
+  localStorage.removeItem('token');
+  localStorage.removeItem('role');
   window.location.href = '/';
 });
 
