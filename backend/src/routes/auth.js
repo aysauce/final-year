@@ -185,7 +185,9 @@ async function loginStartHandler(req, res) {
       );
       const cooldownUntil = cooldownRows[0]?.cooldown_until;
       if (cooldownUntil && new Date(cooldownUntil).getTime() > Date.now()) {
-        return res.status(429).json({ error: 'This device is on a short cooldown. Try again shortly.' });
+        const remainingMs = new Date(cooldownUntil).getTime() - Date.now();
+        const mins = Math.max(1, Math.ceil(remainingMs / 60000));
+        return res.status(429).json({ error: `You can log back in ${mins} min(s). Try again shortly.` });
       }
     }
     const { rows } = await query(
@@ -214,8 +216,21 @@ async function loginStartHandler(req, res) {
       return issueLoginSuccess(user, res);
     }
 
-    const creds = await query('SELECT credential_id, transports FROM webauthn_credentials WHERE user_id =$1', [user.id]);
+    const creds = await query('SELECT credential_id, transports FROM webauthn_credentials WHERE user_id = $1', [user.id]);
     if (!creds) return res.status(400).json({ error: 'Wrong device' });
+
+    if (creds.rows.length === 0) {
+      const userIdUInt8Array = new TextEncoder().encode(user.id.toString());
+      const regOptions = await generateRegistrationOptions({
+        rpName: rpName,
+        rpID: rpID,
+        userID: userIdUInt8Array,
+        userName: user.email,
+      });
+      await query('UPDATE users SET webauthn_current_challenge = $1 WHERE id = $2', [regOptions.challenge, user.id]);
+      const loginTicket = createLoginTicket(user.id, 'register');
+      return res.json({ registerRequired: true, loginTicket, options: regOptions });
+    }
 
     const authOptions = await generateAuthenticationOptions({
       rpID: rpID,

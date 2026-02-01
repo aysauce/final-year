@@ -243,13 +243,51 @@ router.get(
     const { sessionId } = req.params;
     try {
       const { rows } = await query(
-        `SELECT a.id, a.timestamp, a.credential_id, u.surname, u.first_name, u.middle_name, u.matric_number
+        `SELECT a.id, a.timestamp, a.credential_id, u.surname, u.first_name, u.middle_name, u.matric_number,
+                c.name AS course_name, c.code AS course_code, s.start_time
          FROM attendance a
          JOIN users u ON a.student_id = u.id
+         JOIN sessions s ON a.session_id = s.id
+         LEFT JOIN courses c ON s.course_id = c.id
          WHERE a.session_id = $1
          ORDER BY a.timestamp ASC`,
         [sessionId]
       );
+      if ((req.query.format || '').toLowerCase() === 'xlsx') {
+        const wb = new ExcelJS.Workbook();
+        const ws = wb.addWorksheet('Attendance');
+        const courseName = rows[0]?.course_name || 'Course';
+        const courseCode = rows[0]?.course_code || 'N/A';
+        const dateStr = rows[0]?.start_time ? new Date(rows[0].start_time).toISOString().slice(0, 10) : '';
+        const title = `${courseName} (${courseCode})${dateStr ? ` - ${dateStr}` : ''}`;
+        const columns = ['Surname', 'First Name', 'Middle Name', 'Matric'];
+
+        ws.addRow([title]);
+        ws.mergeCells(1, 1, 1, columns.length);
+        ws.getRow(1).font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } };
+        ws.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+        ws.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '1B6EDC' } };
+        ws.addRow([]);
+
+        const headerRow = ws.addRow(columns);
+        headerRow.font = { bold: true };
+        headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+        headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'E2E8F0' } };
+
+        rows.forEach((r) => {
+          ws.addRow([r.surname || '', r.first_name || '', r.middle_name || '', r.matric_number || '']);
+        });
+
+        ws.columns = columns.map((col, idx) => {
+          if (idx === 3) return { width: 14 };
+          return { width: 18 };
+        });
+
+        const buffer = await wb.xlsx.writeBuffer();
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=attendance-${sessionId}.xlsx`);
+        return res.send(Buffer.from(buffer));
+      }
       if ((req.query.format || '').toLowerCase() === 'csv') {
         const csv = stringify(rows, { header: true });
         res.setHeader('Content-Type', 'text/csv');

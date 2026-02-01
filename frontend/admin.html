@@ -15,58 +15,15 @@
     </header>
     <main class="container">
       <section class="card">
-        <h2>Overview</h2>
-        <div id="overviewStats" class="muted">Loading stats...</div>
-      </section>
-
-      <section class="card">
-        <h2>Students</h2>
-        <form id="studentForm" class="row" style="gap:0.5rem; flex-wrap:wrap">
-          <input type="email" id="studentEmail" placeholder="Email" required />
-          <input type="text" id="studentMatric" placeholder="Matric" required />
-          <input type="password" id="studentPassword" placeholder="Password" required />
-          <button type="submit">Add Student</button>
-        </form>
+        <h2>Reset Student WebAuthn</h2>
+        <div class="actions" style="flex-wrap:wrap">
+          <label class="field" style="min-width:220px">
+            Search (Email or Matric)
+            <input type="text" id="studentSearch" placeholder="e.g., student@uni.edu.ng or STU1001" />
+          </label>
+        </div>
         <table class="table" id="studentsTable">
-          <thead><tr><th>Email</th><th>Matric</th><th>Actions</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </section>
-
-      <section class="card">
-        <h2>Teachers</h2>
-        <form id="teacherForm" class="row" style="gap:0.5rem; flex-wrap:wrap">
-          <input type="email" id="teacherEmail" placeholder="Email" required />
-          <input type="text" id="teacherStaff" placeholder="Staff ID" required />
-          <input type="password" id="teacherPassword" placeholder="Password" required />
-          <button type="submit">Add Teacher</button>
-        </form>
-        <table class="table" id="teachersTable">
-          <thead><tr><th>Email</th><th>Staff ID</th><th>Actions</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </section>
-
-      <section class="card">
-        <h2>Courses</h2>
-        <form id="courseForm" class="row" style="gap:0.5rem; flex-wrap:wrap">
-          <input type="text" id="courseName" placeholder="Course Name" required />
-          <input type="text" id="courseCode" placeholder="Code" required />
-          <input type="number" id="courseTeacherId" placeholder="Teacher ID" required />
-          <button type="submit">Add Course</button>
-        </form>
-        <table class="table" id="coursesTable">
-          <thead><tr><th>Code</th><th>Name</th><th>Teacher</th><th>Actions</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </section>
-
-      <section class="card">
-        <h2>Sessions</h2>
-        <table class="table" id="sessionsTable">
-          <thead>
-            <tr><th>ID</th><th>Course</th><th>Teacher</th><th>Status</th><th>Start</th><th>End</th><th>Actions</th></tr>
-          </thead>
+          <thead><tr><th>Name</th><th>Email</th><th>Matric</th><th>Actions</th></tr></thead>
           <tbody></tbody>
         </table>
       </section>

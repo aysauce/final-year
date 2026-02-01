@@ -17,6 +17,9 @@ async function get(url) {
   return data;
 }
 
+const WebAuthn = window.WebAuthnHelpers || {};
+const { preformatCreateOptions, bufferEncode } = WebAuthn;
+
 async function loadProfile() {
   const greet = document.getElementById('studentGreeting');
   if (!greet) return;
@@ -243,6 +246,58 @@ if (historyApply) historyApply.addEventListener('click', renderHistory);
 
 loadProfile();
 loadHistory();
+
+async function refreshDeviceStatus() {
+  const statusEl = document.getElementById('deviceStatus');
+  const btn = document.getElementById('registerDeviceBtn');
+  if (!statusEl || !btn) return;
+  try {
+    const res = await get(`${window.API_BASE}/webauthn/status`);
+    if (res.registered) {
+      statusEl.textContent = 'Device registered.';
+      btn.disabled = true;
+    } else {
+      statusEl.textContent = 'No device registered. Please register your device.';
+      btn.disabled = false;
+    }
+  } catch (e) {
+    statusEl.textContent = 'Unable to check device status.';
+    btn.disabled = false;
+  }
+}
+
+const registerBtn = document.getElementById('registerDeviceBtn');
+if (registerBtn) {
+  registerBtn.addEventListener('click', async () => {
+    const msg = document.getElementById('deviceMsg');
+    if (msg) msg.textContent = 'Starting device registration...';
+    registerBtn.disabled = true;
+    try {
+      const options = await post(`${window.API_BASE}/webauthn/register/start`, {});
+      const publicKey = preformatCreateOptions ? preformatCreateOptions(options) : options;
+      const credential = await navigator.credentials.create({ publicKey });
+      const payload = {
+        id: credential.id,
+        rawId: bufferEncode(credential.rawId),
+        type: credential.type,
+        response: {
+          attestationObject: bufferEncode(credential.response.attestationObject),
+          clientDataJSON: bufferEncode(credential.response.clientDataJSON),
+          transports: credential.response.getTransports ? credential.response.getTransports() : undefined,
+        },
+        clientExtensionResults: credential.getClientExtensionResults(),
+      };
+      await post(`${window.API_BASE}/webauthn/register/finish`, payload);
+      if (msg) msg.textContent = 'Device registered successfully.';
+      await refreshDeviceStatus();
+    } catch (err) {
+      if (msg) msg.textContent = err.message;
+      registerBtn.disabled = false;
+    }
+  });
+}
+
+refreshDeviceStatus();
 
 // Available courses ----------------------------------------------------------
 async function loadAvailable() {

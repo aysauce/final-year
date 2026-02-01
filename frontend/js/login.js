@@ -87,6 +87,7 @@ const loginSubmit = loginForm ? loginForm.querySelector('button[type="submit"]')
 const signupCallout = document.getElementById('studentSignup');
 const identifierLabel = document.getElementById('identifierLabel');
 const identifierInput = document.getElementById('identifier');
+const forgotPasswordWrap = document.getElementById('forgotPasswordWrap');
 const deviceIdKey = 'deviceId';
 
 function getDeviceId() {
@@ -115,6 +116,13 @@ function updateSignupVisibility() {
   signupCallout.setAttribute('aria-hidden', isStudent ? 'false' : 'true');
 }
 
+function updateForgotVisibility(role) {
+  if (!forgotPasswordWrap) return;
+  const canReset = role === 'student' || role === 'teacher';
+  forgotPasswordWrap.classList.toggle('is-hidden', !canReset);
+  forgotPasswordWrap.setAttribute('aria-hidden', canReset ? 'false' : 'true');
+}
+
 document.querySelectorAll('input[name="role"]').forEach((input) => {
   input.addEventListener('change', () => {
     updateSignupVisibility();
@@ -127,6 +135,7 @@ updateIdentifierFields();
 function updateIdentifierFields() {
   const selectedRole = document.querySelector('input[name="role"]:checked');
   const role = selectedRole ? selectedRole.value : 'student';
+  updateForgotVisibility(role);
 
   if (identifierLabel) {
     if (role === 'teacher') {

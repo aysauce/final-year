@@ -5,22 +5,26 @@ Overview
 --------
 - Three-tier architecture: Frontend (HTML/CSS/JS), Backend (Node.js + Express), Database (PostgreSQL).
 - Core security: teacher-controlled sessions (1-10 minutes), OTPs, WebAuthn device binding for students, Wi-Fi subnet enforcement, HTTPS-ready headers.
-- Role-based dashboards: student, teacher, and admin.
+- Role-based dashboards: student, teacher, and minimal admin (reset WebAuthn only).
 
 Key Features
 ------------
-- Student signup with surname/first name/last name, email, matric, password + WebAuthn registration.
-- Teacher signup page creates teacher accounts (public route) and auto-logs in.
+- Student signup with surname, first name, middle name, email, matric, password + WebAuthn setup.
+- Teacher signup page (public) captures biodata: surname, first name, middle name, position (Mr/Mrs/Miss/Dr/Prof), sex.
 - Login accepts email or matric/staff ID + password (case-insensitive; supports IDs like 22/1054).
-- OTP email includes course code and the student name; OTP TTL follows session duration (capped).
+- Students without WebAuthn credentials are prompted to register a passkey immediately after password verification during login.
+- Forgot password flow for students and lecturers using a time-limited email reset code.
+- OTP email uses course code in subject and personalized greeting in body; OTP TTL follows session duration (capped).
 - Student history: last 7 across all courses by default; filter by course and date range.
 - Teacher course management: add, update, or drop courses; changes reflect across student views.
-- Live attendance: teacher sees student name + matric.
+- Teacher attendance reports: course summary exports (XLSX), pass marks, pass/fail highlighting, and score scaling.
+- Live attendance: teacher sees student name + matric; no device column.
+- Device cooldown: per-device 10-minute cooldown enforced after student logout to reduce device hopping.
 
 Quick Start
 -----------
 1. Requirements: Node 18+, PostgreSQL 13+, npm, a `.env` file.
-2. Create the DB and run `sql/schema.sql`, then apply incremental updates in `sql/updates/` (including `004_add_user_names.sql`).
+2. Create the DB and run `sql/schema.sql`, then apply incremental updates in `sql/updates/`.
 3. Duplicate `backend/.env.example` -> `backend/.env`, set values (API port, DB URL, SMTP, WebAuthn config).
 4. Backend:
    ```bash
@@ -28,7 +32,8 @@ Quick Start
    npm install
    npm run dev
    ```
-5. Frontend: serve `frontend/` (VS Code Live Server, XAMPP, or `npx serve frontend -p 5173`). Update `frontend/js/config.js` if the API runs on a different origin.
+5. Frontend: serve `frontend/` (VS Code Live Server, XAMPP, or `npx serve frontend -p 5173`).
+   Update `frontend/js/config.js` if the API runs on a different origin.
 
 Environment Variables (backend/.env)
 ------------------------------------
@@ -43,6 +48,7 @@ Environment Variables (backend/.env)
 - `WEBAUTHN_RP_ID=localhost` (or your prod domain)
 - `WEBAUTHN_ORIGIN=http://localhost:5000`
 - `WEBAUTHN_VERIFY_WINDOW_SECS=120`
+- `PASSWORD_RESET_TTL_MINUTES=15`
 
 Auth & Identity
 ---------------
@@ -55,32 +61,79 @@ Auth & Identity
   - Matric/staff IDs are stored uppercase.
   - IDs with slashes (e.g., `22/1054`) are supported.
 
+WebAuthn Device Binding
+-----------------------
+- Students are bound to a passkey (WebAuthn) device.
+- Login flow (student):
+  1) Password verified.
+  2) If no WebAuthn credential exists for the student, the server returns registration options and the browser creates a passkey.
+  3) Credential is saved to the database and the login completes.
+  4) Subsequent logins require the registered passkey (WebAuthn authentication).
+- If a student loses a device, an admin resets their WebAuthn credential. The next login will prompt registration again.
+
+Forgot Password
+---------------
+- Available for student and lecturer accounts from the login page.
+- Step 1: enter email and request a reset code (sent by email).
+- Step 2: submit the code with a new password to complete the reset.
+- Codes expire after `PASSWORD_RESET_TTL_MINUTES` (default 15).
+- The forgot-password screen includes show/hide toggles for both new and confirm password fields.
+
+Device Cooldown (Per Device)
+----------------------------
+- When a student logs out, the device enters a 10-minute cooldown stored server-side.
+- Login from that device (any account) is blocked until cooldown expires.
+- Error shown: "You can log back in X min(s). Try again shortly."
+
 Teacher Flow
 ------------
 - Login with staff email/staff ID + password.
-- Create/manage courses, then start attendance per course (duration 1-10 min). Subnet CIDR auto-detected from the network the teacher is on.
-- Update or drop courses from the Courses section (updates reflect in student views).
-- Monitor attendees in real time and download:
-  - Session CSV (single session log)
-  - Course report CSV (rows = students, columns = dates, Y/N)
-- Pause/resume/end sessions at any time; countdown timer reflects state.
+- Create/manage courses (name, code, level, program, pass mark, etc.).
+- Update or drop courses from the Courses section; changes reflect across student views.
+- Start attendance per course (duration 1-10 min). Subnet CIDR is auto-detected from the teacher network.
+- Live attendance table shows student name + matric in real time.
+- Session controls: pause/resume/end at any time; countdown is shown as time only (bold).
+
+Teacher Attendance Reports
+--------------------------
+Course Attendance Summary
+- Select a course to view a summary table (max 5 rows unless searching).
+- Search by student name or matric.
+- Pass mark (percent) determines pass/fail.
+- Optional "Score out of" field converts attendance count to a custom scale.
+- Download full course attendance as XLSX using "Download Course Attendance".
+
+Course Attendance XLSX (Download Course Attendance)
+- Title row: course name and course code (bold).
+- Columns: Surname, First Name, Middle Name, Matric, session dates, Total (no of attendances), and optional score.
+- Each student row is shaded green or red based on pass mark.
+- Session columns are grouped by 2-hour windows per course. If the same course is held twice on the same day, columns are labeled with suffixes (e.g., 2026-01-30 A, 2026-01-30 B).
+
+Today Attendance XLSX (Download Today's Attendance)
+- Button label: "Download Today's Attendance".
+- Enabled only after a session ends; available only until you start a new session or log out.
+- Output styling matches the course report, but does NOT include pass/fail coloring, total, or score columns.
+- Title row: course name + course code + attendance date.
+- Filename includes course name/code and date.
 
 Student Flow
 ------------
-- Visit `signup.html`, create an account (surname, first name, last name, email, matric, password), and register the device with WebAuthn during onboarding. That first device becomes the trusted authenticator.
-- During login, students can use email or matric number + password. Students must use their registered WebAuthn credential when required.
-- Join a session only if on the same Wi-Fi subnet as the teacher; request OTP (rate-limited, delivered via email) and submit it to log attendance.
-- View attendance history: default shows last 7 across all courses; filter by course and date range for more.
+- Create an account with surname, first name, middle name, email, matric, password.
+- Login with email or matric + password; WebAuthn passkey is required (or registered if missing).
+- Use "Forgot password?" on the login page to reset your password by email.
+- Student dashboard greets with "Hello <FirstName>".
+- Join a session only if on the same Wi-Fi subnet as the teacher.
+- Request OTP (rate-limited, delivered via email) and submit it to log attendance.
+- Attendance history:
+  - Default view: last 7 attendances across all courses.
+  - Range filters: Last 7 attendances, Today, Yesterday, Last Week, Last Month, Custom.
+  - Course selection shows lecturer name (from teacher biodata) when browsing available courses.
 
-Admin Flow
-----------
-- Login with `test@admin.edu.ng` / `password` via the main login page (admins skip WebAuthn).
-- Land on `admin.html`, which provides:
-  - Dashboard overview (counts for students, teachers, courses, sessions)
-  - Student management: create/edit/delete, reset WebAuthn credentials, change passwords
-  - Teacher management: create/edit/delete, change passwords
-  - Course CRUD (assign to teachers)
-  - Session oversight: view/close sessions and inspect attendance
+Admin Flow (Minimal)
+--------------------
+- Admin console only supports WebAuthn resets for students.
+- Students are not listed until searched in the admin panel.
+- Use reset to clear WebAuthn credentials; students will re-register on next login.
 
 OTP Email Format
 ----------------
@@ -95,8 +148,8 @@ Security Notes
 - Input hardening: Helmet supplies security headers; express-validator sanitizes payloads.
 - OTPs: random 6-digit codes hashed with bcrypt, short-lived and tied to session duration (capped).
 - Rate limiting: 3 OTP requests per minute per user.
-- WebAuthn device binding: students can only log in from previously registered devices; admins manage resets when re-provisioning is needed.
-- Wi-Fi enforcement: the server checks client IP (`req.ip`) against the subnet configured by the teacher. Browsers cannot read SSID directly.
+- WebAuthn is origin-bound and requires user presence/verification at the time of attendance.
+- Wi-Fi enforcement: the server checks client IP (`req.ip`) against the subnet configured by the teacher.
 
 Testing Data
 ------------
@@ -108,13 +161,17 @@ Runbook
 -------
 1. `cd backend && npm run dev`
 2. Serve `frontend/` (Live Server or `npx serve frontend -p 5173`)
-3. Teacher: create a course, start attendance (subnet auto). Students: sign up (WebAuthn registration), log in, request OTP, submit.
+3. Teacher: create a course, start attendance (subnet auto). Students: log in, register passkey if prompted, request OTP, submit.
 
 Database Updates
 ----------------
-- Apply migrations in `sql/updates/` in order.
-- Latest migration adds student name fields:
-  - `sql/updates/004_add_user_names.sql`
+Apply migrations in `sql/updates/` in order. Key updates include:
+- `004_add_user_names.sql`: adds surname, first_name, middle_name.
+- `005_add_teacher_biodata.sql`: adds title and sex for teachers.
+- `006_drop_last_name.sql`: removes last_name column.
+- `007_add_course_pass_mark.sql`: adds pass_mark to courses.
+- `009_add_device_cooldowns.sql`: device_cooldowns table for per-device cooldown.
+- `010_add_password_resets.sql`: password reset codes table.
 
 Deployment Tips
 ---------------
@@ -129,6 +186,5 @@ Accessibility
 Notes & Limitations
 -------------------
 - Browsers cannot expose Wi-Fi SSID; subnet verification uses client IP (ensure reverse proxies forward IP correctly).
-- WebAuthn still relies on users registering or authorizing their authenticator. Provide an admin "reset device" flow (already built) before re-registering a new device.
+- WebAuthn reset is handled via the minimal admin panel.
 - For higher assurance, integrate AP controller hooks or client TLS certificates if you control all devices.
-"# final-year"

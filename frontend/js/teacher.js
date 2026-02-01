@@ -321,21 +321,21 @@ loadCourses().then(syncCourseControls);
 document.getElementById('downloadCsv').addEventListener('click', async () => {
   if (!lastCompletedSessionId) return alert('No completed session to export.');
   try {
-    const res = await fetch(`${window.API_BASE}/teacher/get-attendance/${lastCompletedSessionId}?format=csv`, { headers: authHeaders() });
+    const res = await fetch(`${window.API_BASE}/teacher/get-attendance/${lastCompletedSessionId}?format=xlsx`, { headers: authHeaders() });
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     const course = courses.find((c) => Number(c.id) === Number(lastCompletedCourseId));
     const courseSlug = course ? `${course.code}-${course.name}`.replace(/\s+/g, '-').toLowerCase() : `session-${lastCompletedSessionId}`;
     const dateSlug = new Date().toISOString().slice(0, 10);
-    a.href = url; a.download = `${courseSlug}-${dateSlug}.csv`; a.click();
+    a.href = url; a.download = `${courseSlug}-${dateSlug}.xlsx`; a.click();
     URL.revokeObjectURL(url);
   } catch (e) { alert('Download failed'); }
 });
 
 document.getElementById('downloadCourseCsv').addEventListener('click', async () => {
-  const sel = document.getElementById('courseReportSelect');
-  const courseId = Number(sel && sel.value);
+  const reportSel = document.getElementById('courseReportSelect');
+  const courseId = Number(reportSel && reportSel.value);
   if (!courseId) return alert('Select a course first');
   try {
     const scale = Number(document.getElementById('courseReportScale')?.value);

@@ -34,3 +34,14 @@ export async function sendOtpEmail(to, code, { courseCode, minutes, surname, fir
   const tr = getTransporter();
   return tr.sendMail({ from, to, subject, text });
 }
+
+export async function sendPasswordResetEmail(to, code, { minutes, surname, firstName }) {
+  const from = process.env.EMAIL_FROM || 'no-reply@example.com';
+  const safeMinutes = Number.isFinite(minutes) && minutes > 0 ? Math.ceil(minutes) : 15;
+  const subject = 'Password Reset Code';
+  const nameParts = [surname, firstName].filter(Boolean).join(' ');
+  const hello = nameParts ? `Hello, ${nameParts},` : 'Hello,';
+  const text = `${hello}\n\nUse this code to reset your password. It expires in ${safeMinutes} minutes:\n${code}`;
+  const tr = getTransporter();
+  return tr.sendMail({ from, to, subject, text });
+}

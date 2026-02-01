@@ -9,6 +9,7 @@ import studentRoutes from './routes/student.js';
 import attendanceRoutes from './routes/attendance.js';
 import webauthnRoutes from './routes/webauthn.js';
 import adminRoutes from './routes/admin.js';
+import passwordRoutes from './routes/password.js';
 
 // 🟩 NEW IMPORTS — required for static frontend
 import path from 'path';
@@ -67,6 +68,7 @@ app.use('/api/student', studentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api', attendanceRoutes);
 app.use('/api', webauthnRoutes);
+app.use('/api', passwordRoutes);
 
 // 404
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));

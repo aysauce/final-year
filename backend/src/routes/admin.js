@@ -41,7 +41,7 @@ router.get('/overview', async (req, res) => {
 // Students CRUD ----------------------------------------------------------------
 router.get('/students', async (req, res) => {
   const { rows } = await query(
-    'SELECT id, email, matric_number, created_at FROM users WHERE role = \'student\' ORDER BY created_at DESC LIMIT 200'
+    'SELECT id, email, matric_number, surname, first_name, middle_name, created_at FROM users WHERE role = \'student\' ORDER BY created_at DESC LIMIT 200'
   );
   res.json(rows);
 });
