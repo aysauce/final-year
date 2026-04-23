@@ -341,13 +341,15 @@ async function buildCourseAttendance(courseId, teacherId) {
   });
   const dateSeen = {};
   const slotLabels = slots.map((slot) => {
-    const dateStr = new Date(slot.startMs).toISOString().slice(0, 10);
+    const d = new Date(slot.startMs);
+    const dateStr = d.toISOString().slice(0, 10);
+    const timeStr = d.toISOString().slice(11, 16);
     dateSeen[dateStr] = (dateSeen[dateStr] || 0) + 1;
     if (dateCounts[dateStr] > 1) {
       const suffix = String.fromCharCode(64 + dateSeen[dateStr]);
-      return `${dateStr} ${suffix}`;
+      return `${dateStr} ${timeStr} - ${suffix}`;
     }
-    return dateStr;
+    return `${dateStr} ${timeStr}`;
   });
 
   const { rows: attendanceRows } = await query(

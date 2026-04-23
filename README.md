@@ -11,6 +11,7 @@ Key Features
 ------------
 - Student signup with surname, first name, middle name, email, matric, password + WebAuthn setup.
 - Teacher signup page (public) captures biodata: surname, first name, middle name, position (Mr/Mrs/Miss/Dr/Prof), sex.
+- Separate login pages: students on `/`, lecturers on `/teacher-login.html`, admins on `/admin-login.html`.
 - Login accepts email or matric/staff ID + password (case-insensitive; supports IDs like 22/1054).
 - Students without WebAuthn credentials are prompted to register a passkey immediately after password verification during login.
 - Forgot password flow for students and lecturers using a time-limited email reset code.
@@ -19,7 +20,7 @@ Key Features
 - Teacher course management: add, update, or drop courses; changes reflect across student views.
 - Teacher attendance reports: course summary exports (XLSX), pass marks, pass/fail highlighting, and score scaling.
 - Live attendance: teacher sees student name + matric; no device column.
-- Device cooldown: per-device 10-minute cooldown enforced after student logout to reduce device hopping.
+- Device cooldown: per-device 10-minute cooldown enforced after student logout to reduce device hopping (student login only).
 
 Quick Start
 -----------
@@ -53,9 +54,9 @@ Environment Variables (backend/.env)
 Auth & Identity
 ---------------
 - Login accepts:
-  - Students: email or matric number + password
-  - Teachers: email or staff ID + password
-  - Admins: email or staff ID + password
+  - Students: email or matric number + password (student login page).
+  - Teachers: email or staff ID + password (lecturer login page).
+  - Admins: email or staff ID + password (admin login page).
 - Identifiers are normalized server-side:
   - Email is stored lowercase.
   - Matric/staff IDs are stored uppercase.
@@ -73,7 +74,7 @@ WebAuthn Device Binding
 
 Forgot Password
 ---------------
-- Available for student and lecturer accounts from the login page.
+- Available for student and lecturer accounts from their respective login pages.
 - Step 1: enter email and request a reset code (sent by email).
 - Step 2: submit the code with a new password to complete the reset.
 - Codes expire after `PASSWORD_RESET_TTL_MINUTES` (default 15).
@@ -83,6 +84,7 @@ Device Cooldown (Per Device)
 ----------------------------
 - When a student logs out, the device enters a 10-minute cooldown stored server-side.
 - Login from that device (any account) is blocked until cooldown expires.
+- Cooldown is only triggered on the student login page.
 - Error shown: "You can log back in X min(s). Try again shortly."
 
 Teacher Flow
@@ -107,7 +109,7 @@ Course Attendance XLSX (Download Course Attendance)
 - Title row: course name and course code (bold).
 - Columns: Surname, First Name, Middle Name, Matric, session dates, Total (no of attendances), and optional score.
 - Each student row is shaded green or red based on pass mark.
-- Session columns are grouped by 2-hour windows per course. If the same course is held twice on the same day, columns are labeled with suffixes (e.g., 2026-01-30 A, 2026-01-30 B).
+- Session columns are grouped by 2-hour windows per course. If the same course is held twice on the same day, columns are labeled with date + time and suffixes (e.g., 2026-01-30 10:30 - A, 2026-01-30 15:00 - B).
 
 Today Attendance XLSX (Download Today's Attendance)
 - Button label: "Download Today's Attendance".
@@ -119,7 +121,7 @@ Today Attendance XLSX (Download Today's Attendance)
 Student Flow
 ------------
 - Create an account with surname, first name, middle name, email, matric, password.
-- Login with email or matric + password; WebAuthn passkey is required (or registered if missing).
+- Login with email or matric + password on the student login page; WebAuthn passkey is required (or registered if missing).
 - Use "Forgot password?" on the login page to reset your password by email.
 - Student dashboard greets with "Hello <FirstName>".
 - Join a session only if on the same Wi-Fi subnet as the teacher.
@@ -188,3 +190,4 @@ Notes & Limitations
 - Browsers cannot expose Wi-Fi SSID; subnet verification uses client IP (ensure reverse proxies forward IP correctly).
 - WebAuthn reset is handled via the minimal admin panel.
 - For higher assurance, integrate AP controller hooks or client TLS certificates if you control all devices.
+

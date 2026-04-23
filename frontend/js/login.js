@@ -88,6 +88,7 @@ const signupCallout = document.getElementById('studentSignup');
 const identifierLabel = document.getElementById('identifierLabel');
 const identifierInput = document.getElementById('identifier');
 const forgotPasswordWrap = document.getElementById('forgotPasswordWrap');
+const forcedRole = document.body?.dataset?.role || '';
 const deviceIdKey = 'deviceId';
 
 function getDeviceId() {
@@ -108,10 +109,15 @@ function setLoginLoading(isLoading) {
   if (loginForm) loginForm.setAttribute('aria-busy', isLoading ? 'true' : 'false');
 }
 
+function getSelectedRole() {
+  if (forcedRole) return forcedRole;
+  const selectedRole = document.querySelector('input[name="role"]:checked');
+  return selectedRole ? selectedRole.value : 'student';
+}
+
 function updateSignupVisibility() {
   if (!signupCallout) return;
-  const selectedRole = document.querySelector('input[name="role"]:checked');
-  const isStudent = !selectedRole || selectedRole.value === 'student';
+  const isStudent = getSelectedRole() === 'student';
   signupCallout.classList.toggle('is-hidden', !isStudent);
   signupCallout.setAttribute('aria-hidden', isStudent ? 'false' : 'true');
 }
@@ -133,8 +139,7 @@ updateSignupVisibility();
 updateIdentifierFields();
 
 function updateIdentifierFields() {
-  const selectedRole = document.querySelector('input[name="role"]:checked');
-  const role = selectedRole ? selectedRole.value : 'student';
+  const role = getSelectedRole();
   updateForgotVisibility(role);
 
   if (identifierLabel) {
@@ -165,10 +170,15 @@ if (loginForm) {
     error.textContent = '';
     const identifier = document.getElementById('identifier').value.trim();
     const password = document.getElementById('password').value;
+    const role = getSelectedRole();
     setLoginLoading(true);
 
     try {
-      const data = await postJSON(`${window.API_BASE}/login/start`, { identifier, password, deviceId: getDeviceId() });
+      const payload = { identifier, password };
+      if (role === 'student') {
+        payload.deviceId = getDeviceId();
+      }
+      const data = await postJSON(`${window.API_BASE}/login/start`, payload);
 
       if (data.loginComplete) {
         completeLogin(data);

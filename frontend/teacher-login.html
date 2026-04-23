@@ -3,20 +3,20 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Attendance System — Login</title>
+    <title>Lecturer Login</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
+  <body data-role="teacher">
     <main class="container">
-      <h1>Student Login</h1>
-      <p class="muted">For Nigerian Tertiary Institutions</p>
+      <h1>Lecturer Login</h1>
+      <p class="muted">Use your staff email or staff ID.</p>
       <form id="loginForm" class="card">
         <div id="loginLoading" class="loading-bar" role="status" aria-live="polite" aria-hidden="true">
           <span class="sr-only">Loading...</span>
           <div class="loading-bar__fill"></div>
         </div>
-        <label><span id="identifierLabel">Email/Matric</span>
-          <input type="text" id="identifier" required placeholder="e.g., student@uni.edu.ng or STU1234" />
+        <label><span id="identifierLabel">Staff Email/Staff ID</span>
+          <input type="text" id="identifier" required placeholder="e.g., lecturer@uni.edu.ng or STAFF1001" />
         </label>
         <label>Password
           <div class="row" style="gap:0.5rem">
@@ -28,13 +28,6 @@
           <a id="forgotPasswordLink" class="button button-secondary" href="/forgot-password.html">Forgot password?</a>
         </div> -->
         <button type="submit">Log In</button>
-        <div id="studentSignup" class="signup-callout" role="region" aria-label="Student registration">
-          <div>
-            <h3>New student?</h3>
-            <p class="muted">Create your account and register this device.</p>
-          </div>
-          <a class="button" href="/signup.html">Create account</a>
-        </div>
         <p id="loginError" class="error" aria-live="polite"></p>
       </form>
     </main>

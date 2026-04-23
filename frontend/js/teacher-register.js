@@ -8,6 +8,7 @@ async function fetchJSON(url, options = {}) {
 const form = document.getElementById('teacherRegisterForm');
 const statusEl = document.getElementById('teacherRegisterStatus');
 const toggleTeacherBtn = document.getElementById('toggleTeacherPassword');
+const toggleTeacherConfirmBtn = document.getElementById('toggleTeacherConfirmPassword');
 
 if (toggleTeacherBtn) {
   toggleTeacherBtn.addEventListener('click', () => {
@@ -18,6 +19,19 @@ if (toggleTeacherBtn) {
     } else {
       pwd.type = 'password';
       toggleTeacherBtn.textContent = 'Show';
+    }
+  });
+}
+
+if (toggleTeacherConfirmBtn) {
+  toggleTeacherConfirmBtn.addEventListener('click', () => {
+    const pwd = document.getElementById('teacherConfirmPassword');
+    if (pwd.type === 'password') {
+      pwd.type = 'text';
+      toggleTeacherConfirmBtn.textContent = 'Hide';
+    } else {
+      pwd.type = 'password';
+      toggleTeacherConfirmBtn.textContent = 'Show';
     }
   });
 }
@@ -33,6 +47,11 @@ form.addEventListener('submit', async (e) => {
   const email = document.getElementById('teacherEmail').value.trim();
   const staffId = document.getElementById('teacherStaffId').value.trim();
   const password = document.getElementById('teacherPassword').value;
+  const confirmPassword = document.getElementById('teacherConfirmPassword').value;
+  if (password !== confirmPassword) {
+    statusEl.textContent = 'Passwords do not match.';
+    return;
+  }
   try {
     const res = await fetchJSON(`${window.API_BASE}/teacher-signup`, {
       method: 'POST',

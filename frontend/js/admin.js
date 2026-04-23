@@ -12,7 +12,7 @@ async function fetchJSON(url, options = {}) {
 
 function ensureAdmin() {
   if (localStorage.getItem('role') !== 'admin') {
-    window.location.href = '/';
+    window.location.href = '/admin-login.html';
   }
 }
 
@@ -21,7 +21,7 @@ ensureAdmin();
 document.getElementById('logoutBtn').addEventListener('click', () => {
   localStorage.removeItem('token');
   localStorage.removeItem('role');
-  window.location.href = '/';
+  window.location.href = '/admin-login.html';
 });
 
 let studentsCache = [];

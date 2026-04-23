@@ -60,6 +60,12 @@ form.addEventListener('submit', async (e) => {
     const email = document.getElementById('email').value.trim();
     const matricNumber = document.getElementById('matricNumber').value.trim();
     const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    if (password !== confirmPassword) {
+      statusEl.textContent = 'Passwords do not match.';
+      setSignupLoading(false);
+      return;
+    }
     const res = await postJSON(`${window.API_BASE}/signup`, { surname, firstName, middleName, email, matricNumber, password });
 
     if (!res.registerRequired) throw new Error('Unexpected response; please try logging in.');
@@ -112,6 +118,20 @@ if (toggleSignupBtn) {
     } else {
       pwd.type = 'password';
       toggleSignupBtn.textContent = 'Show';
+    }
+  });
+}
+
+const toggleConfirmBtn = document.getElementById('toggleConfirmPassword');
+if (toggleConfirmBtn) {
+  toggleConfirmBtn.addEventListener('click', () => {
+    const pwd = document.getElementById('confirmPassword');
+    if (pwd.type === 'password') {
+      pwd.type = 'text';
+      toggleConfirmBtn.textContent = 'Hide';
+    } else {
+      pwd.type = 'password';
+      toggleConfirmBtn.textContent = 'Show';
     }
   });
 }

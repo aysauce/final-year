@@ -1,7 +1,7 @@
 // Auth guard
 const token = localStorage.getItem('token');
 const role = localStorage.getItem('role');
-if (!token || role !== 'teacher') { window.location.href = '/'; }
+if (!token || role !== 'teacher') { window.location.href = '/teacher-login.html'; }
 
 async function loadTeacherGreeting() {
   const greet = document.getElementById('teacherGreeting');
@@ -142,7 +142,7 @@ document.getElementById('endSessionBtn').addEventListener('click', async () => {
 document.getElementById('logoutBtn').addEventListener('click', () => {
   localStorage.removeItem('token');
   localStorage.removeItem('role');
-  location.href = '/';
+  location.href = '/teacher-login.html';
 });
 
 function highlightCourseRows() {
